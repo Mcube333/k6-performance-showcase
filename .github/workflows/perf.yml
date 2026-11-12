@@ -1,0 +1,73 @@
+name: Performance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Script"
+        type: choice
+        options: [browse-and-search, account-lifecycle]
+        default: browse-and-search
+      profile:
+        description: "Profile"
+        type: choice
+        options: [smoke, load, stress, spike, soak, breakpoint]
+        default: load
+      target:
+        description: "mock = local mock API in the runner; live = public demo (smoke only)"
+        type: choice
+        options: [mock, live]
+        default: mock
+
+jobs:
+  smoke-on-mock:
+    name: Smoke gate (mock API)
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Start mock API
+        run: |
+          nohup python3 mock/mock_server.py --port 8080 > mock.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8080/health && break; sleep 0.5; done
+      - name: Browse and search (smoke)
+        run: k6 run -e BASE_URL=http://127.0.0.1:8080 -e PROFILE=smoke tests/browse-and-search.js
+      - name: Account lifecycle (smoke)
+        run: k6 run -e BASE_URL=http://127.0.0.1:8080 -e PROFILE=smoke tests/account-lifecycle.js
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/
+
+  on-demand:
+    name: ${{ inputs.script }} / ${{ inputs.profile }} / ${{ inputs.target }}
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Start mock API
+        if: inputs.target == 'mock'
+        run: |
+          nohup python3 mock/mock_server.py --port 8080 > mock.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://127.0.0.1:8080/health && break; sleep 0.5; done
+      - name: Run k6
+        run: |
+          if [ "${{ inputs.target }}" = "mock" ]; then
+            BASE_URL=http://127.0.0.1:8080
+          else
+            BASE_URL=https://automationexercise.com   # the script refuses non-smoke profiles here
+          fi
+          k6 run -e BASE_URL=$BASE_URL -e PROFILE=${{ inputs.profile }} tests/${{ inputs.script }}.js
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-${{ inputs.script }}-${{ inputs.profile }}
+          path: reports/

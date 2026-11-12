@@ -1,0 +1,37 @@
+# Run any script/profile against the mock API with nothing installed but Docker:
+#   docker compose run --rm k6
+#   SCRIPT=account-lifecycle PROFILE=load docker compose run --rm k6
+#   ERROR_RATE=0.05 docker compose up -d --force-recreate mock && docker compose run --rm k6   (gate should fail)
+
+services:
+  mock:
+    image: python:3.12-slim
+    working_dir: /app
+    volumes:
+      - ./mock:/app/mock:ro
+    command:
+      - python
+      - mock/mock_server.py
+      - --host=0.0.0.0
+      - --port=8080
+      - --latency-ms=${LATENCY_MS:-40}
+      - --error-rate=${ERROR_RATE:-0}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  k6:
+    image: grafana/k6:1.0.0
+    user: root                      # allows writing reports to the mounted folder
+    working_dir: /scripts
+    depends_on:
+      mock:
+        condition: service_healthy
+    volumes:
+      - ./:/scripts
+    environment:
+      BASE_URL: http://mock:8080
+      PROFILE: ${PROFILE:-smoke}
+    command: ["run", "tests/${SCRIPT:-browse-and-search}.js"]
