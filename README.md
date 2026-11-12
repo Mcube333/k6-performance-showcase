@@ -1,5 +1,7 @@
 # k6 Performance Testing Showcase
 
+[![CI](https://github.com/Mcube333/k6-performance-showcase/actions/workflows/perf.yml/badge.svg?branch=main)](https://github.com/Mcube333/k6-performance-showcase/actions/workflows/perf.yml) ![k6](https://img.shields.io/badge/k6-load_testing-7D64FF) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E) ![Docker](https://img.shields.io/badge/Docker-ready-2496ED)
+
 Performance tests for the [AutomationExercise](https://automationexercise.com) e-commerce API, written in
 **k6 (JavaScript)**, with SLO thresholds that make performance a **pass/fail gate in CI**.
 
