@@ -40,6 +40,12 @@ Part of my [QA & SDET portfolio](https://github.com/Mcube333/portfolio), alongsi
 
 A breached threshold makes k6 exit with code 99, which fails the CI job.
 
+## Sample report
+
+HTML report from a `smoke` run of `browse-and-search` against the local mock API: 23 requests, 0 failed requests, 0 breached thresholds, with p95 latency per endpoint.
+
+![k6 HTML report](docs/k6-report.png)
+
 ## Design decisions
 
 - **Business-level correctness, not just HTTP 200.** This API returns HTTP 200 even for errors and puts the
