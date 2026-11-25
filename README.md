@@ -8,6 +8,8 @@ Performance tests for the [AutomationExercise](https://automationexercise.com) e
 It tests the same API as my Playwright UI/API framework, so the portfolio covers functional UI, API,
 mobile and performance testing of one system.
 
+Part of my [QA & SDET portfolio](https://github.com/Mcube333/portfolio), alongside the [Playwright](https://github.com/Mcube333/playwright-java-showcase), [Appium](https://github.com/Mcube333/appium-java-mobile-showcase) and [analytics validator](https://github.com/Mcube333/analytics-event-validator) projects.
+
 ## What it tests
 
 | Script | Journey | Why it matters |
@@ -72,6 +74,12 @@ mock/mock_server.py     local mock of the API
 .github/workflows/perf.yml
 ```
 
+## Prerequisites
+
+Either of these:
+- **Local:** [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/) and Python 3 (for the local mock API).
+- **Docker:** Docker with Compose, nothing else (see the Docker section).
+
 ## Running
 
 Install k6: https://grafana.com/docs/k6/latest/set-up/install-k6/
@@ -121,6 +129,10 @@ Reports land in `reports/` on the host.
 For each run I report: profile and target, peak VUs or request rate, p95 / p99 per endpoint against the budget,
 error rate, which thresholds passed or failed, and for spike / breakpoint the recovery time or breaking rate.
 Then one line on the bottleneck and what to investigate next.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
 
 ## Author
 
